@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Invaders</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas { 
+            border: 2px solid white;
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script> //This is the beginning fo javascipt inside an Html file. Can be written in a script.js file, and filled with <script src="scipt.js"><\script>, for example.
+
+const canvas = document.getElementById("gameCanvas"); // After every command in javascript is a semicolon (;)
+const ctx = canvas.getContext("2d");
+
+// Score
+let score = 0;
+let lives = 3;
+
+// Game Over state variable
+let gameOver = false;
+let playerWon = false;
+
+let playerInvincible = false;
+let invincibilityTimer = 0;
+
+let rocketTimer = 0;
+let rocketInterval = 15;
+
+// -------------
+// PLAYER
+// -------------
+
+const player = {
+    x: 375,
+    y: 540,
+    width: 50,
+    height: 30,
+    speed: 5
+};
+
+
+// ------------
+// ALIENS
+// ------------
+
+const aliens = [];
+
+const alienRows = 4;
+const alienColumns = 8;
+
+for (let row = 0; row < alienRows; row++) {
+    for (let column = 0; column < alienColumns; column++) {
+
+        aliens.push({
+            x: 100 + column * 70,
+            y: 80 + row * 50,
+            width: 40,
+            height: 30,
+            alive: true
+        });
+
+    }
+}
+
+// ------------
+// Rockets
+// ------------
+
+const rockets = [];
+const alienRockets = [];
+const maxRockets = 5;
+
+let alienRocketTimer = 0;
+let alienRocketInterval = 120;
+
+// ------------
+// Check game over function
+// ------------
+function checkGameOver() {
+
+    if (lives <= 0) {
+        gameOver = true;
+    }
+}
+
+function checkWin() {
+
+    const remainingAliens = aliens.filter(alien => alien.alive); //creates a list containing all aliens that are alive. 
+
+    if (remainingAliens.length === 0) {
+        playerWon = true;
+        gameOver = true;
+    }
+}
+
+
+// -------------
+// Function that fires alien rocket from random, alive alien
+// -------------
+
+function fireAlienRocket() {
+
+    const livingAliens = aliens.filter(alien => alien.alive);
+
+    if (livingAliens.length === 0) {
+        return;
+    }
+
+    const alien = livingAliens[
+        Math.floor(Math.random() * livingAliens.length)
+    ];
+
+    alienRockets.push({
+        x: alien.x + alien.width / 2 - 2,
+        y: alien.y + alien.height,
+        width: 4,
+        height: 10,
+        speed: 4
+    });
+}
+
+//Update the alien rockets
+function updateAlienRockets() {
+
+    if (gameOver){
+        return;
+    }
+
+    alienRocketTimer++;
+
+    const remainingAliens = aliens.filter(alien => alien.alive).length;
+
+    const currentAlienRocketInterval = 
+        Math.max(40, 120 - (32 - remainingAliens) * 2); // Decrease interval as aliens are destroyed, but not below 40
+
+    if (alienRocketTimer >= currentAlienRocketInterval) {
+        fireAlienRocket();
+        alienRocketTimer = 0;
+    }
+
+    for (let i = alienRockets.length - 1; i >= 0; i--) {
+
+        alienRockets[i].y += alienRockets[i].speed;
+
+        if (alienRockets[i].y > canvas.height) {
+            alienRockets.splice(i, 1);
+        }
+    }
+}
+
+// Draw the alien rockets
+function drawAlienRockets() {
+
+    ctx.fillStyle = "red";
+
+    for (let rocket of alienRockets) {
+
+        ctx.fillRect(
+            rocket.x,
+            rocket.y,
+            rocket.width,
+            rocket.height
+        );
+
+    }
+}
+
+// Check the alien rocket collision of the alien rockets with the space ship
+function checkAlienRocketCollisions() {
+
+    if (playerInvincible) {
+        return;
+    }
+
+    for (let i = alienRockets.length - 1; i >= 0; i--) {
+
+        let rocket = alienRockets[i];
+
+        if (
+            rocket.x < player.x + player.width &&
+            rocket.x + rocket.width > player.x &&
+            rocket.y < player.y + player.height &&
+            rocket.y + rocket.height > player.y
+        ) {
+
+            lives--;
+
+            alienRockets.splice(i, 1);
+
+            player.x = canvas.width / 2 - player.width / 2;
+
+            playerInvincible = true;
+            invincibilityTimer = 120;
+            
+            break;
+        }
+    }
+}
+
+function updateInvincibility() {
+
+    if (!playerInvincible) {
+        return;
+    }
+
+    invincibilityTimer--;
+
+    if (invincibilityTimer <= 0) {
+        playerInvincible = false;
+    }
+}
+
+
+
+// Detect rocket fire keyboard event
+/*
+
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === " ") {
+
+        rockets.push({
+            x: player.x + player.width / 2 - 2,
+            y: player.y,
+            width: 4,
+            height: 10,
+            speed: 7
+        });
+
+    }
+
+}); 
+
+*/
+
+function updateRocketFiring() {
+
+    if (gameOver) {
+        return;
+    }
+
+    if (keys[" "]) {
+
+        rocketTimer++;
+
+        if (rocketTimer >= rocketInterval && rockets.length < maxRockets) {
+
+            rockets.push({
+                x: player.x + player.width / 2 - 2,
+                y: player.y,
+                width: 4,
+                height: 10,
+                speed: 7
+            });
+
+            rocketTimer = 0;
+        }
+    } else {
+
+        rocketTimer = rocketInterval; // Reset the timer when space is released
+    }
+
+}
+
+// --------------
+// Update Rockets
+// --------------
+
+function updateRockets() {
+
+    for (let i = rockets.length - 1; i >= 0; i--) {
+
+        rockets[i].y -= rockets[i].speed;
+
+        if (rockets[i].y + rockets[i].height < 0) {
+            rockets.splice(i, 1);
+        }
+    }
+
+    // for (let rocket of rockets) {
+    //     rocket.y -= rocket.speed;
+    // }
+
+}
+
+// --------------
+// Check rocket/alien collision
+// --------------
+function checkRocketCollisions() {
+
+    //for (let rocket of rockets) {
+    for (let i = rockets.length - 1; i >= 0; i--){
+
+        let rocket = rockets[i]
+
+        for (let alien of aliens) { 
+
+            if (!alien.alive) {
+                continue;
+            }
+
+            if (
+                rocket.x < alien.x + alien.width &&
+                rocket.x + rocket.width > alien.x &&
+                rocket.y < alien.y + alien.height &&
+                rocket.y + rocket.height > alien.y
+            ) {
+
+                alien.alive = false;
+                rockets.splice(i, 1);
+                //rocket.y = -100;
+
+                score += 10;
+
+                break;
+            }
+        }
+    }
+}
+
+// ---------------
+// Detect when aliens reach player
+// ---------------
+function checkAlienPosition() {
+
+    for (let alien of aliens) {
+
+        if (
+            alien.alive &&
+            alien.y + alien.height >= player.y
+        ) {
+            lives = 0;
+        }
+    }
+}
+
+
+// Display score
+function drawScore() {
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+
+    ctx.fillText(
+        "score: " + score,
+        20,
+        30
+    );
+}
+
+// ------------
+// Draw Lives 
+// ------------
+function drawLives() {
+
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+
+    ctx.fillText(
+        "Lives: " + lives,
+        canvas.width - 100,
+        30
+    );
+}
+
+
+// -------------
+// Draw Rockets
+// -------------
+function drawRockets() {
+
+    ctx.fillStyle = "white";
+
+    for (let rocket of rockets) {
+
+        ctx.fillRect(
+            rocket.x, 
+            rocket.y, 
+            rocket.width,
+            rocket.height
+        );
+    }
+}
+
+
+
+// ------------
+// Draw Aliens
+// ------------
+
+function drawAliens() {
+
+    ctx.fillStyle = "lime";
+
+    for (let alien of aliens) {
+
+        if (alien.alive) {
+
+            ctx.fillRect(
+                alien.x,
+                alien.y,
+                alien.width,
+                alien.height
+            );
+
+        }
+    }
+}
+
+// ------------
+// KEYBOARD
+// ------------
+
+const keys = {};
+
+// Detect keydown and keyup events to track which keys are pressed
+document.addEventListener("keydown", function(event) {
+    keys[event.key] = true;
+});
+
+document.addEventListener("keyup", function(event) {
+    keys[event.key] = false;
+});
+
+document.addEventListener("keydown", function(event) {
+
+    if (event.key.toLowerCase() === "r" && gameOver) {
+        location.reload();
+    }
+})
+
+// ------------
+// Update Player 
+// ------------
+
+function updatePlayer() {
+
+    if(gameOver) {
+        return;
+    }
+
+    if (keys["ArrowLeft"]) {
+        player.x -= player.speed;
+    }
+
+    if (keys["ArrowRight"]) {
+        player.x += player.speed;
+    }
+
+    // Keep player inside canvas
+
+    if (player.x < 0) {
+        player.x = 0;
+    }
+
+    if (player.x + player.width > canvas.width) {
+        player.x = canvas.width - player.width;
+    }
+}
+
+// -------------
+// Draw player 
+// -------------
+
+function drawPlayer() {
+
+    if (playerInvincible && Math.floor(invincibilityTimer / 10) % 2 === 0) {
+        return;
+    }
+
+    ctx.fillStyle = "lime";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.width,
+        player.height
+    );
+}
+
+// ------------
+// Alien Movement
+// ------------
+
+let alienDirection = 1;
+let alienSpeed = 1;
+
+// Update Aliens
+function updateAliens() {
+
+    const remainingAliens = aliens.filter(alien => alien.alive).length;
+
+    alienSpeed = 1 + (32 - remainingAliens) * 0.05; // Increase speed as aliens are destroyed
+
+    let hitEdge = false;
+
+    for (let alien of aliens) {
+
+        if (!alien.alive) {
+            continue;
+        }
+
+        alien.x += alienSpeed * alienDirection; // Initialize alien x direction
+
+        if (alien.x <= 0 || alien.x + alien.width >= canvas.width) {
+            hitEdge = true;
+        }
+    }
+
+    // Change direction if aliens hit the edge
+    if (hitEdge) {
+
+        alienDirection *= -1;
+
+        for (let alien of aliens) { 
+
+            if (!alien.alive) {
+                continue;
+            }
+
+            alien.y += 20 + (32 - remainingAliens) * 0.5;
+        }
+    }
+}
+
+// -----------
+// Draw Game Over screen function
+// -----------
+function drawGameOver() {
+
+    if (!gameOver) {
+        return;
+    }
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+
+    if (playerWon) {
+        
+        ctx.font = "50px Arial";
+
+        ctx.fillText(
+            "YOU WIN!",
+            canvas.width / 2,
+            canvas.height / 2
+        );
+
+    } else {
+
+        ctx.font = "50px Arial";
+
+        ctx.fillText(
+            "GAME OVER",
+            canvas.width / 2,
+            canvas.height / 2
+        );
+
+    }
+
+    ctx.font = "20px Arial";
+
+    ctx.fillText(
+        "Press R to restart",
+        canvas.width / 2,
+        canvas.height / 2 + 50
+    );
+
+    ctx.textAlign = "left";
+}
+
+
+// ####################################
+// ------------------------------------
+// ------------Game Loop---------------
+// ------------------------------------
+// ####################################
+
+
+function gameLoop() {
+    ctx.clearRect(
+        0, 
+        0, 
+        canvas.width, 
+        canvas.height
+    );
+    
+    if (!gameOver) {
+
+        // Update game //All the update functions are called here, in the game loop, to update the game state. These are all game logics
+        updatePlayer();
+        // Update aliens
+        updateAliens();
+        // Update rockets
+        updateRockets();
+        // Update rocket firing
+        updateRocketFiring();
+        // Update alien rockets
+        updateAlienRockets();
+
+        // Check collision
+        checkRocketCollisions();
+        // Check alien rocket collision
+        checkAlienRocketCollisions();
+        // Update invincibility
+        updateInvincibility();
+        // Check alien position
+        checkAlienPosition();
+        // Check zero lives
+        checkGameOver();
+        // Check if all aliens dead
+        checkWin();
+
+    }
+
+    
+
+    // Draw game
+    drawPlayer();
+    // Draw aliens
+    drawAliens();
+    // Draw rockets
+    drawRockets();
+    // Draw alien rockets
+    drawAlienRockets();
+    // Draw score
+    drawScore();
+    // Draw lives
+    drawLives();
+    // Draw Game Over
+    drawGameOver();
+
+    // Run next frame
+    requestAnimationFrame(gameLoop);
+}
+
+// Start game
+gameLoop();
+
+</script>
+
+</body>
+</html>
+
