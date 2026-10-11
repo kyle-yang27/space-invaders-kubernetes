@@ -1,0 +1,26 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: space-invaders
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: space-invaders
+
+  template:
+    metadata:
+      labels:
+        app: space-invaders
+
+    spec:
+      containers:
+        - name: space-invaders
+          image: space-invaders:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
