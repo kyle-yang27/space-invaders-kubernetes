@@ -24,6 +24,21 @@
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
 <script> //This is the beginning fo javascipt inside an Html file. Can be written in a script.js file, and filled with <script src="scipt.js"><\script>, for example.
+// Alien sprite
+const alienImage = new Image();
+alienImage.src = "images/Blue_slime_sprite.png";
+
+// Alien rocket sprite
+const alienRocketImage = new Image();
+alienRocketImage.src = "images/alien_missile.png";
+
+// Player rocket sprite
+const playerRocketImage = new Image();
+playerRocketImage.src = "images/player_missile.png";
+
+// Player character sprite
+const playerImage = new Image();
+playerImage.src = "images/spaceship.png";
 
 const canvas = document.getElementById("gameCanvas"); // After every command in javascript is a semicolon (;)
 const ctx = canvas.getContext("2d");
@@ -167,17 +182,24 @@ function updateAlienRockets() {
 // Draw the alien rockets
 function drawAlienRockets() {
 
-    ctx.fillStyle = "red";
+    // ctx.fillStyle = "red";
 
     for (let rocket of alienRockets) {
 
-        ctx.fillRect(
-            rocket.x,
-            rocket.y,
-            rocket.width,
-            rocket.height
-        );
+        if (alienRocketImage.complete && alienRocketImage.naturalWidth > 0) {
+        // ctx.fillRect(
 
+        const displayWidth = 32;
+        const displayHeight = 40;
+
+        ctx.drawImage(
+            alienRocketImage,
+            rocket.x + (rocket.width - displayWidth) / 2, // Center the image horizontally?
+            rocket.y + (rocket.height - displayHeight) / 2, // Center the image vertically?
+            displayWidth,
+            displayHeight
+        );
+        }
     }
 }
 
@@ -384,16 +406,24 @@ function drawLives() {
 // -------------
 function drawRockets() {
 
-    ctx.fillStyle = "white";
+    // ctx.fillStyle = "white";
 
     for (let rocket of rockets) {
+        // ctx.fillRect(
 
-        ctx.fillRect(
-            rocket.x, 
-            rocket.y, 
-            rocket.width,
-            rocket.height
+        if (playerRocketImage.complete && playerRocketImage.naturalWidth > 0) {
+        
+            const displayWidth = 28;
+            const displayHeight = 40;
+
+            ctx.drawImage(
+                playerRocketImage,
+                rocket.x + (rocket.width - displayWidth) / 2,
+                rocket.y + (rocket.height - displayHeight) / 2,
+                displayWidth, 
+                displayHeight
         );
+        }
     }
 }
 
@@ -405,17 +435,22 @@ function drawRockets() {
 
 function drawAliens() {
 
-    ctx.fillStyle = "lime";
+    //ctx.fillStyle = "lime";
 
     for (let alien of aliens) {
 
-        if (alien.alive) {
+        if (alien.alive && alienImage.complete && alienImage.naturalWidth > 0) {
+            //ctx.fillRect(
 
-            ctx.fillRect(
-                alien.x,
-                alien.y,
-                alien.width,
-                alien.height
+            const displayWidth = 45;
+            const displayHeight = 45;
+
+            ctx.drawImage(
+                alienImage,
+                alien.x + (alien.width - displayWidth) / 2, // Center the image horizontally,
+                alien.y + (alien.height - displayHeight) / 2, // Center the image vertically.
+                displayWidth, 
+                displayHeight
             );
 
         }
@@ -483,14 +518,21 @@ function drawPlayer() {
         return;
     }
 
-    ctx.fillStyle = "lime";
+    if (playerImage.complete && playerImage.naturalWidth > 0) {
+    // ctx.fillStyle = "lime";
 
-    ctx.fillRect(
-        player.x,
-        player.y,
-        player.width,
-        player.height
+    const displayWidth = 50;
+    const displayHeight = 50;
+
+    // ctx.fillRect(
+    ctx.drawImage(
+        playerImage,
+        player.x + (player.width - displayWidth) / 2, // Center the image horizontally
+        player.y + (player.height - displayHeight) / 2, // Center the image virtically
+        displayWidth, 
+        displayHeight
     );
+}
 }
 
 // ------------
