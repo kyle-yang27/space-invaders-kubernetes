@@ -24,7 +24,7 @@ All game sprites were created from scratch using LibreSprite.
 
 | Player Rocket | Alien Rocket |
 |---|---|
-| <img src="images/player_missile.png" width="64" alt="Player Rocket"> | <img src="images/alien_missile.png" width="64" alt="Alien Rocket"> |
+| <img src="images/player_missile.png" width="48" alt="Player Rocket"> | <img src="images/alien_missile.png" width="48" alt="Alien Rocket"> |
 
 
 <!-- ## Original Pixel Art
