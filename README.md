@@ -13,7 +13,21 @@ The project is containerized with Docker and deployed locally using Kubernetes.
 
 ![Space Invaders Gameplay](images/space-invaders-screenshot.png)
 
+
 ## Original Pixel Art
+
+All game sprites were created from scratch using LibreSprite.
+
+| Player | Alien |
+|---|---|
+| <img src="images/spaceship.png" width="64" alt="Player Sprite"> | <img src="images/Blue_slime_sprite.png" width="64" alt="Alien Sprite"> |
+
+| Player Rocket | Alien Rocket |
+|---|---|
+| <img src="images/player_missile.png" width="64" alt="Player Rocket"> | <img src="images/alien_missile.png" width="64" alt="Alien Rocket"> |
+
+
+<!-- ## Original Pixel Art
 
 All game sprites were created from scratch using LibreSprite.
 
@@ -23,7 +37,7 @@ All game sprites were created from scratch using LibreSprite.
 
 | Player Rocket | Alien Rocket |
 |---|---|
-| ![Player Rocket](images/player_missile.png) | ![Alien Rocket](images/alien_missile.png) |
+| ![Player Rocket](images/player_missile.png) | ![Alien Rocket](images/alien_missile.png) | -->
 
 ## Original Space Invaders Gameplay
 
