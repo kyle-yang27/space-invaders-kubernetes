@@ -5,6 +5,10 @@ A browser-based Space Invaders game built with HTML, CSS, and JavaScript, featur
 
 The project is containerized with Docker and deployed locally using Kubernetes.
 
+## Gameplay
+
+![Space Invaders Gameplay](images/space-invaders-gameplay.gif)
+
 ## Game Screenshot
 
 ![Space Invaders Gameplay](images/space-invaders-screenshot.png)
